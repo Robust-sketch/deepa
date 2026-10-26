@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Birthday Deepa Ma'am!</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      background: radial-gradient(circle at center, #2b1055 0%, #150630 60%, #0b021a 100%);
+      font-family: 'Poppins', sans-serif;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+      position: relative;
+      padding: 20px 16px;
+    }
+
+    /* Canvas for both fireworks and sprinkles behind main card */
+    #backgroundCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Glassmorphic main card */
+    .card {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 490px;
+      padding: clamp(24px, 5vw, 40px) 24px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.09);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 28px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    }
+
+    h1 {
+      font-family: 'Dancing Script', cursive;
+      font-size: clamp(2.2rem, 7.5vw, 3.4rem);
+      color: #ff758c;
+      text-shadow: 0 0 20px rgba(255, 117, 140, 0.8), 0 0 35px rgba(255, 126, 179, 0.5);
+      margin-bottom: 20px;
+      line-height: 1.2;
+    }
+
+    /* Birthday Photo Carousel */
+    .photo-carousel {
+      position: relative;
+      width: clamp(180px, 48vw, 220px);
+      aspect-ratio: 1 / 1;
+      margin: 10px auto 26px;
+      border-radius: 50%;
+      border: 4px solid #ff758c;
+      overflow: hidden;
+      box-shadow:
+        0 0 18px rgba(255, 117, 140, 0.8),
+        0 0 35px rgba(255, 126, 179, 0.5);
+      animation: carouselGlow 3s ease-in-out infinite alternate;
+      touch-action: pan-y;
+    }
+
+    @keyframes carouselGlow {
+      from {
+        box-shadow: 0 0 12px #ff758c;
+        transform: scale(1);
+      }
+      to {
+        box-shadow: 0 0 32px #ff758c, 0 0 48px #ff7eb3;
+        transform: scale(1.03);
+      }
+    }
+
+    .carousel-track {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .carousel-slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transform: scale(1.08);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+      pointer-events: none;
+    }
+
+    .carousel-slide.active {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+
+    .carousel-slide img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      border-radius: 50%;
+    }
+
+    /* Navigation buttons */
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(30, 10, 60, 0.85);
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    }
+
+    .carousel-btn:hover {
+      background: #ff758c;
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .carousel-btn.prev {
+      left: 10px;
+    }
+
+    .carousel-btn.next {
+      right: 10px;
+    }
+
+    /* Slide indicators */
+    .carousel-dots {
+      position: absolute;
+      bottom: 12px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      z-index: 5;
+    }
+
+    .carousel-dots .dot {
+      width: 9px;
+      height: 9px;
+      padding: 0;
+      border: 1px solid white;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.55);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .carousel-dots .dot.active {
+      background: #ff758c;
+      transform: scale(1.3);
+      border-color: #ff758c;
+    }
+
+    .wish-message {
+      font-size: clamp(0.95rem, 3.5vw, 1.12rem);
+      line-height: 1.7;
+      color: #e2d4f8;
+      margin-bottom: 22px;
+      white-space: pre-line;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Birthday cake visual */
+    .cake-wrapper {
+      position: relative;
+      width: 170px;
+      height: 145px;
+      margin: 20px auto 28px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .cake {
+      position: relative;
+      width: 100%;
+      height: 60%;
+      background: linear-gradient(to bottom, #ff9a9e, #fecfef);
+      border-radius: 12px 12px 6px 6px;
+      box-shadow: inset 0 -10px rgba(0, 0, 0, 0.08),
+                  0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .cake::before {
+      content: "";
+      position: absolute;
+      top: -12px;
+      left: 0;
+      width: 100%;
+      height: 25px;
+      background: white;
+      border-radius: 12px 12px 15px 15px;
+    }
+
+    .icing-drips {
+      position: absolute;
+      top: 8px;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+    }
+
+    .drip {
+      width: 15px;
+      height: 18px;
+      background: white;
+      border-radius: 0 0 10px 10px;
+    }
+
+    .candle {
+      position: absolute;
+      top: 18%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 12px;
+      height: 42px;
+      background: repeating-linear-gradient(
+        45deg,
+        #ff5e7e,
+        #ff5e7e 6px,
+        white 6px,
+        white 12px
+      );
+      border-radius: 3px 3px 0 0;
+      z-index: 3;
+    }
+
+    .wick {
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 8px;
+      background: #444;
+    }
+
+    .flame {
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      width: 16px;
+      height: 23px;
+      background: radial-gradient(
+        ellipse at bottom,
+        white 10%,
+        #ffe600 40%,
+        #ff5722 80%
+      );
+      border-radius: 50% 50% 35% 35%;
+      cursor: pointer;
+      transform: translateX(-50%);
+      transform-origin: center bottom;
+      animation: flicker 0.3s infinite alternate, glow 1.5s infinite alternate;
+      transition: opacity 0.5s ease;
+    }
+
+    @keyframes flicker {
+      from { transform: translateX(-50%) rotate(-5deg) scaleY(0.95); }
+      to { transform: translateX(-50%) rotate(5deg) scaleY(1.08); }
+    }
+
+    @keyframes glow {
+      from { filter: drop-shadow(0 0 5px orange); }
+      to { filter: drop-shadow(0 0 18px #ff5722); }
+    }
+
+    .flame.extinguished {
+      opacity: 0;
+      pointer-events: none;
+      animation: none;
+    }
+
+    .wish-btn {
+      background: linear-gradient(135deg, #ff758c, #ff7eb3);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      font-family: inherit;
+      font-size: 1.05rem;
+      font-weight: 600;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(255, 117, 140, 0.4);
+      transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+    }
+
+    .wish-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 25px rgba(255, 117, 140, 0.6);
+    }
+
+    .wish-btn:focus-visible {
+      outline: 2px solid white;
+      outline-offset: 4px;
+    }
+
+    @media (max-width: 380px) {
+      .card { padding: 22px 14px; }
+      h1 { font-size: 1.9rem; }
+      .wish-btn { padding: 12px 22px; font-size: 0.95rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Canvas for dynamic background (Fireworks & Sprinkles) -->
+  <canvas id="backgroundCanvas" aria-hidden="true"></canvas>
+
+  <main class="card">
+
+    <h1>Happy Birthday, Deepa Ma'am! 🎉🎂</h1>
+    
+    <!-- Birthday Photo Carousel -->
+    <div class="photo-carousel" id="birthdayCarousel">
+      <div class="carousel-track">
+        <!-- High quality fallback portraits -->
+        <div class="carousel-slide active">
+          <img src="img1.jpg" alt="Deepa Ma'am - Photo 1">
+        </div>
+        <div class="carousel-slide">
+          <img src="img2.jpg" alt="Deepa Ma'am - Photo 2">
+        </div>
+        <div class="carousel-slide">
+          <img src="img3.jpg" alt="Deepa Ma'am - Photo 3">
+        </div>
+       <!-- <div class="carousel-slide">
+          <img src="img4.jpg" alt="Deepa Ma'am - Photo 4">
+        </div>-->
+        <div class="carousel-slide">
+          <img src="img5.jpg" alt="Deepa Ma'am - Photo 5">
+        </div>
+      </div>
+
+      <!-- Carousel Buttons -->
+      <button class="carousel-btn prev" type="button" aria-label="Previous photo">&#10094;</button>
+      <button class="carousel-btn next" type="button" aria-label="Next photo">&#10095;</button>
+
+      <!-- Slide indicators -->
+      <div class="carousel-dots">
+        <button class="dot active" aria-label="Show photo 1"></button>
+        <button class="dot" aria-label="Show photo 2"></button>
+        <button class="dot" aria-label="Show photo 3"></button>
+        
+        <button class="dot" aria-label="Show photo 5"></button>
+      </div>
+    </div>
+
+    <p class="wish-message" id="message">दु:खका बादलहरू हटेर सधैं सुखको घाम लागोस्,
+तिम्रो जीवनमा उमङ्गको नयाँ रङ्ग छाओस्।
+हाँसिरहनु, बाँचिरहनु, यसरी नै रमाईरहनु,
+प्रिय साथी, तिमीलाई जन्मदिनको लाखौँ लाख शुभकामना!! 💖
+
+Make a wish and blow out the candle! ✨</p>
+
+    <div class="cake-wrapper">
+      <div class="candle">
+        <div class="wick"></div>
+        <div class="flame" id="candleFlame" title="Click to blow out the candle"></div>
+      </div>
+
+      <div class="cake">
+        <div class="icing-drips">
+          <div class="drip"></div>
+          <div class="drip"></div>
+          <div class="drip"></div>
+          <div class="drip"></div>
+          <div class="drip"></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="wish-btn" id="wishBtn">
+      Make a Wish ✨
+    </button>
+
+  </main>
+
+  <script>
+    // ==========================================
+    // Dynamic Canvas: Fireworks + Sprinkles Effect
+    // ==========================================
+    const canvas = document.getElementById("backgroundCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let width, height;
+    let sprinkles = [];
+    let fireworks = [];
+    let fireworkParticles = [];
+    let blownOut = false;
+
+    const sprinkleColors = ["#ff758c", "#fffa65", "#32ff7e", "#18dcff", "#7d5fff", "#ffb8b8"];
+    const fireworkColors = ["#ff4757", "#2ed573", "#1e90ff", "#ffa502", "#e84393", "#00d2d3", "#fffa65"];
+
+    function resizeCanvas() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      width = window.innerWidth;
+      height = window.innerHeight;
+
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = width + "px";
+      canvas.style.height = height + "px";
+
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    // --- Sprinkles Class ---
+    class Sprinkle {
+      constructor(initial = false) {
+        this.reset(initial);
+      }
+
+      reset(initial = false) {
+        this.x = Math.random() * width;
+        this.y = initial ? Math.random() * height : -15;
+        this.w = Math.random() * 4 + 3;
+        this.h = Math.random() * 8 + 5;
+        this.color = sprinkleColors[Math.floor(Math.random() * sprinkleColors.length)];
+        this.speedY = Math.random() * 2 + 1.2;
+        this.speedX = Math.random() - 0.5;
+        this.rotation = Math.random() * Math.PI * 2;
+        this.rotationSpeed = (Math.random() - 0.5) * 0.05;
+      }
+
+      update() {
+        this.y += this.speedY * (blownOut ? 2.5 : 1);
+        this.x += this.speedX;
+        this.rotation += this.rotationSpeed;
+
+        if (this.y > height + 20) {
+          this.reset();
+        }
+      }
+
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation);
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(-this.w / 2, -this.h / 2, this.w, this.h, 3);
+        } else {
+          ctx.rect(-this.w / 2, -this.h / 2, this.w, this.h);
+        }
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // --- Firework Rocket Class ---
+    class Firework {
+      constructor() {
+        this.x = Math.random() * (width * 0.8) + width * 0.1;
+        this.y = height;
+        this.targetY = Math.random() * (height * 0.45) + height * 0.08;
+        this.speed = Math.random() * 3 + 7;
+        this.angle = Math.PI / 2 + (Math.random() - 0.5) * 0.2;
+        this.vx = Math.cos(this.angle) * (Math.random() * 1.5 - 0.75);
+        this.vy = -this.speed;
+        this.color = fireworkColors[Math.floor(Math.random() * fireworkColors.length)];
+        this.trail = [];
+      }
+
+      update() {
+        this.trail.push({ x: this.x, y: this.y });
+        if (this.trail.length > 5) this.trail.shift();
+
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Explode when reaching peak target or velocity decays
+        if (this.y <= this.targetY) {
+          createExplosion(this.x, this.y, this.color);
+          return false;
+        }
+        return true;
+      }
+
+      draw() {
+        ctx.save();
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        if (this.trail.length > 0) {
+          ctx.moveTo(this.trail[0].x, this.trail[0].y);
+          for (let i = 1; i < this.trail.length; i++) {
+            ctx.lineTo(this.trail[i].x, this.trail[i].y);
+          }
+        } else {
+          ctx.moveTo(this.x, this.y);
+          ctx.lineTo(this.x, this.y + 8);
+        }
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    // --- Firework Particle Burst Class ---
+    class FireworkParticle {
+      constructor(x, y, color) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        const speed = Math.random() * 5 + 1.5;
+        const angle = Math.random() * Math.PI * 2;
+        this.vx = Math.cos(angle) * speed;
+        this.vy = Math.sin(angle) * speed;
+        this.friction = 0.96;
+        this.gravity = 0.08;
+        this.alpha = 1;
+        this.decay = Math.random() * 0.018 + 0.012;
+        this.size = Math.random() * 2.5 + 1.5;
+      }
+
+      update() {
+        this.vx *= this.friction;
+        this.vy *= this.friction;
+        this.vy += this.gravity;
+        this.x += this.vx;
+        this.y += this.vy;
+        this.alpha -= this.decay;
+        return this.alpha > 0;
+      }
+
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, this.alpha);
+        ctx.fillStyle = this.color;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function createExplosion(x, y, color) {
+      const count = Math.floor(Math.random() * 30) + 40;
+      for (let i = 0; i < count; i++) {
+        fireworkParticles.push(new FireworkParticle(x, y, color));
+      }
+    }
+
+    function initSprinkles() {
+      sprinkles = [];
+      const count = Math.min(Math.floor(window.innerWidth / 8), 90);
+      for (let i = 0; i < count; i++) {
+        sprinkles.push(new Sprinkle(true));
+      }
+    }
+
+    let lastFireworkTime = 0;
+    function animate(timestamp) {
+      // Gentle fade background clear for vibrant firework trails
+      ctx.fillStyle = "rgba(11, 2, 26, 0.25)";
+      ctx.fillRect(0, 0, width, height);
+
+      // Launch fireworks periodically (faster bursts if candle is blown out)
+      const fireworkInterval = blownOut ? 400 : 900;
+      if (timestamp - lastFireworkTime > fireworkInterval) {
+        fireworks.push(new Firework());
+        lastFireworkTime = timestamp;
+      }
+
+      // Update & Draw Fireworks rockets
+      fireworks = fireworks.filter(fw => {
+        const alive = fw.update();
+        if (alive) fw.draw();
+        return alive;
+      });
+
+      // Update & Draw Firework burst particles
+      fireworkParticles = fireworkParticles.filter(p => {
+        const alive = p.update();
+        if (alive) p.draw();
+        return alive;
+      });
+
+      // Update & Draw Falling Sprinkles
+      sprinkles.forEach(sprinkle => {
+        sprinkle.update();
+        sprinkle.draw();
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    resizeCanvas();
+    initSprinkles();
+    requestAnimationFrame(animate);
+
+    window.addEventListener("resize", () => {
+      resizeCanvas();
+      initSprinkles();
+    });
+
+    // ==========================================
+    // Interactive Candle & Wish Handler
+    // ==========================================
+    const flame = document.getElementById("candleFlame");
+    const wishBtn = document.getElementById("wishBtn");
+    const message = document.getElementById("message");
+
+    const originalMessage = `दु:खका बादलहरू हटेर सधैं सुखको घाम लागोस्,
+तिम्रो जीवनमा उमङ्गको नयाँ रङ्ग छाओस्।
+हाँसिरहनु, बाँचिरहनु, यसरी नै रमाईरहनु,
+प्रिय साथी, तिमीलाई जन्मदिनको लाखौँ लाख शुभकामना!! 💖
+
+Make a wish and blow out the candle! ✨`;
+
+    const wishedMessage = `✨ Your wish has been sent into the universe! ✨
+May all your dreams come true, 
+Happy Birthday,
+Deepa Ma'am! 🎉🎂🎉💖💖`;
+
+    function toggleWish() {
+      blownOut = !blownOut;
+      flame.classList.toggle("extinguished", blownOut);
+
+      if (blownOut) {
+        message.innerText = wishedMessage;
+        wishBtn.textContent = "Relight Candle 🕯️";
+        // Extra celebration firework burst
+        for (let i = 0; i < 4; i++) {
+          setTimeout(() => fireworks.push(new Firework()), i * 180);
+        }
+      } else {
+        message.innerText = originalMessage;
+        wishBtn.textContent = "Make a Wish ✨";
+      }
+    }
+
+    flame.addEventListener("click", toggleWish);
+    wishBtn.addEventListener("click", toggleWish);
+
+    // ==========================================
+    // Birthday Photo Carousel Logic
+    // ==========================================
+    const carousel = document.getElementById("birthdayCarousel");
+    const slides = carousel.querySelectorAll(".carousel-slide");
+    const dots = carousel.querySelectorAll(".dot");
+    const prevBtn = carousel.querySelector(".prev");
+    const nextBtn = carousel.querySelector(".next");
+
+    let currentSlide = 0;
+    let carouselTimer;
+
+    function showSlide(index) {
+      currentSlide = (index + slides.length) % slides.length;
+
+      slides.forEach((slide, i) => {
+        slide.classList.toggle("active", i === currentSlide);
+      });
+
+      dots.forEach((dot, i) => {
+        dot.classList.toggle("active", i === currentSlide);
+      });
+    }
+
+    function nextSlide() {
+      showSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+      showSlide(currentSlide - 1);
+    }
+
+    function startCarousel() {
+      clearInterval(carouselTimer);
+      carouselTimer = setInterval(nextSlide, 3200);
+    }
+
+    nextBtn.addEventListener("click", () => {
+      nextSlide();
+      startCarousel();
+    });
+
+    prevBtn.addEventListener("click", () => {
+      prevSlide();
+      startCarousel();
+    });
+
+    dots.forEach((dot, index) => {
+      dot.addEventListener("click", () => {
+        showSlide(index);
+        startCarousel();
+      });
+    });
+
+    // Touch swipe support for mobile
+    let touchStartX = 0;
+    carousel.addEventListener("touchstart", (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    carousel.addEventListener("touchend", (e) => {
+      let touchEndX = e.changedTouches[0].screenX;
+      if (touchStartX - touchEndX > 40) {
+        nextSlide();
+        startCarousel();
+      } else if (touchEndX - touchStartX > 40) {
+        prevSlide();
+        startCarousel();
+      }
+    }, { passive: true });
+
+    // Pause auto-sliding on hover
+    carousel.addEventListener("mouseenter", () => clearInterval(carouselTimer));
+    carousel.addEventListener("mouseleave", startCarousel);
+
+    // Start Carousel
+    showSlide(0);
+    startCarousel();
+  </script>
+
+</body>
+</html>
